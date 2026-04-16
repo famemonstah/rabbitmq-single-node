@@ -2,8 +2,9 @@
 # RabbitMQ version to install
 rabbitmq_version: "4.0.9"
 
-# Erlang version to install (Launchpad epoch format)
-# Erlang 27.x has no ARM64 packages – using 26.x from Launchpad PPA
+# Erlang version to install
+# Erlang 27.x repos (ppa1/ppa2.rabbitmq.com) are unreachable from some cloud providers
+# Erlang 26.x from Launchpad is compatible with RabbitMQ 4.0.4+
 erlang_version: "1:26.2.5.6-2"
 
 # Daemon settings

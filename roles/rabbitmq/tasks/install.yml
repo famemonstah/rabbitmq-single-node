@@ -20,7 +20,7 @@
       > /usr/share/keyrings/com.rabbitmq.team.gpg
     creates: /usr/share/keyrings/com.rabbitmq.team.gpg
 
-- name: Download Launchpad PPA signing key (for Erlang 26 arm64)
+- name: Download Launchpad PPA signing key (for Erlang 26)
   ansible.builtin.shell:
     cmd: >
       curl -1sLf
@@ -32,7 +32,7 @@
 # ──────────────────────────────────────────────
 # Apt sources
 # ──────────────────────────────────────────────
-- name: Add Erlang apt source (Launchpad – amd64 + arm64)
+- name: Add Erlang apt source (Launchpad – amd64 + arm64, Erlang 26)
   ansible.builtin.copy:
     dest: /etc/apt/sources.list.d/erlang.list
     owner: root
@@ -86,23 +86,23 @@
 - name: Install Erlang packages
   ansible.builtin.apt:
     name:
-      - erlang-base
-      - erlang-asn1
-      - erlang-crypto
-      - erlang-eldap
-      - erlang-ftp
-      - erlang-inets
-      - erlang-mnesia
-      - erlang-os-mon
-      - erlang-parsetools
-      - erlang-public-key
-      - erlang-runtime-tools
-      - erlang-snmp
-      - erlang-ssl
-      - erlang-syntax-tools
-      - erlang-tftp
-      - erlang-tools
-      - erlang-xmerl
+      - erlang-base={{ erlang_version }}
+      - erlang-asn1={{ erlang_version }}
+      - erlang-crypto={{ erlang_version }}
+      - erlang-eldap={{ erlang_version }}
+      - erlang-ftp={{ erlang_version }}
+      - erlang-inets={{ erlang_version }}
+      - erlang-mnesia={{ erlang_version }}
+      - erlang-os-mon={{ erlang_version }}
+      - erlang-parsetools={{ erlang_version }}
+      - erlang-public-key={{ erlang_version }}
+      - erlang-runtime-tools={{ erlang_version }}
+      - erlang-snmp={{ erlang_version }}
+      - erlang-ssl={{ erlang_version }}
+      - erlang-syntax-tools={{ erlang_version }}
+      - erlang-tftp={{ erlang_version }}
+      - erlang-tools={{ erlang_version }}
+      - erlang-xmerl={{ erlang_version }}
     state: present
 
 - name: Install RabbitMQ server

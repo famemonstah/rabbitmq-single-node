@@ -2,6 +2,22 @@
 - name: Include install tasks
   ansible.builtin.include_tasks: install.yml
 
+- name: Allow AMQP port through UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ rabbitmq_amqp_port }}"
+    proto: tcp
+
+- name: Allow RabbitMQ management UI port through UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ rabbitmq_management_port }}"
+    proto: tcp
+
+- name: Ensure UFW is enabled
+  community.general.ufw:
+    state: enabled
+
 - name: Ensure RabbitMQ service is enabled and started
   ansible.builtin.service:
     name: "{{ rabbitmq_daemon }}"
