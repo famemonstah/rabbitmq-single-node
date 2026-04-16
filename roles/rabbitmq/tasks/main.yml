@@ -1,0 +1,15 @@
+---
+- name: Include install tasks
+  ansible.builtin.include_tasks: install.yml
+
+- name: Ensure RabbitMQ service is enabled and started
+  ansible.builtin.service:
+    name: "{{ rabbitmq_daemon }}"
+    state: "{{ rabbitmq_state }}"
+    enabled: "{{ rabbitmq_enabled }}"
+
+- name: Include configuration tasks
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Include user management tasks
+  ansible.builtin.include_tasks: users.yml

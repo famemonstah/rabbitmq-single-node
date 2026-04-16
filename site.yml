@@ -1,0 +1,8 @@
+---
+- name: Deploy single-node RabbitMQ
+  hosts: rabbitmq
+  become: true
+  gather_facts: true
+
+  roles:
+    - rabbitmq

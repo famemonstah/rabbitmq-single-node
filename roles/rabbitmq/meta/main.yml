@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: rabbitmq
+  author: local
+  description: Install and configure a single-node RabbitMQ cluster on Ubuntu 24.04
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble   # 24.04
+
+collections:
+  - community.rabbitmq
+
+dependencies: []

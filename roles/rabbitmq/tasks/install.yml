@@ -1,0 +1,113 @@
+---
+- name: Install prerequisites
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg
+      - apt-transport-https
+    state: present
+    update_cache: true
+
+# ──────────────────────────────────────────────
+# GPG signing keys
+# ──────────────────────────────────────────────
+- name: Download Team RabbitMQ signing key (for rabbitmq-server repo)
+  ansible.builtin.shell:
+    cmd: >
+      curl -1sLf
+      "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA"
+      | gpg --dearmor
+      > /usr/share/keyrings/com.rabbitmq.team.gpg
+    creates: /usr/share/keyrings/com.rabbitmq.team.gpg
+
+- name: Download Launchpad PPA signing key (for Erlang 26 arm64)
+  ansible.builtin.shell:
+    cmd: >
+      curl -1sLf
+      "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xf77f1eda57ebb1cc"
+      | gpg --dearmor
+      > /usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg
+    creates: /usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg
+
+# ──────────────────────────────────────────────
+# Apt sources
+# ──────────────────────────────────────────────
+- name: Add Erlang apt source (Launchpad – amd64 + arm64)
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/erlang.list
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang-26/ubuntu {{ ansible_facts.distribution_release }} main
+
+- name: Add RabbitMQ server apt sources (Team RabbitMQ – _all.deb)
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/rabbitmq.list
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      deb [signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb1.rabbitmq.com/rabbitmq-server/ubuntu/{{ ansible_facts.distribution_release }} {{ ansible_facts.distribution_release }} main
+      deb [signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb2.rabbitmq.com/rabbitmq-server/ubuntu/{{ ansible_facts.distribution_release }} {{ ansible_facts.distribution_release }} main
+
+# ──────────────────────────────────────────────
+# Version pinning
+# ──────────────────────────────────────────────
+- name: Pin Erlang packages to Launchpad PPA
+  ansible.builtin.copy:
+    dest: /etc/apt/preferences.d/erlang
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Package: erlang*
+      Pin: origin ppa.launchpad.net
+      Pin-Priority: 1001
+
+- name: Pin RabbitMQ version
+  ansible.builtin.copy:
+    dest: /etc/apt/preferences.d/rabbitmq
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Package: rabbitmq-server
+      Pin: version {{ rabbitmq_version }}-1
+      Pin-Priority: 1001
+
+# ──────────────────────────────────────────────
+# Install Erlang + RabbitMQ
+# ──────────────────────────────────────────────
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Erlang packages
+  ansible.builtin.apt:
+    name:
+      - erlang-base
+      - erlang-asn1
+      - erlang-crypto
+      - erlang-eldap
+      - erlang-ftp
+      - erlang-inets
+      - erlang-mnesia
+      - erlang-os-mon
+      - erlang-parsetools
+      - erlang-public-key
+      - erlang-runtime-tools
+      - erlang-snmp
+      - erlang-ssl
+      - erlang-syntax-tools
+      - erlang-tftp
+      - erlang-tools
+      - erlang-xmerl
+    state: present
+
+- name: Install RabbitMQ server
+  ansible.builtin.apt:
+    name: rabbitmq-server
+    state: present
+    allow_unauthenticated: false
+

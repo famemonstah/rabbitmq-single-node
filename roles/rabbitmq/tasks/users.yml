@@ -1,0 +1,33 @@
+---
+- name: Enable RabbitMQ plugins
+  community.rabbitmq.rabbitmq_plugin:
+    names: "{{ rabbitmq_plugins | join(',') }}"
+    state: enabled
+  notify: Restart rabbitmq-server
+
+- name: Flush handlers to restart RabbitMQ if needed
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for RabbitMQ management port to be available
+  ansible.builtin.wait_for:
+    port: "{{ rabbitmq_management_port }}"
+    host: 127.0.0.1
+    delay: 5
+    timeout: 60
+
+- name: Create RabbitMQ admin user
+  community.rabbitmq.rabbitmq_user:
+    user: "{{ rabbitmq_admin_user }}"
+    password: "{{ rabbitmq_admin_password }}"
+    vhost: "{{ rabbitmq_vhost }}"
+    configure_priv: ".*"
+    write_priv: ".*"
+    read_priv: ".*"
+    tags: administrator
+    state: present
+
+- name: Remove default guest user
+  community.rabbitmq.rabbitmq_user:
+    user: guest
+    state: absent
+  when: rabbitmq_remove_guest | bool
